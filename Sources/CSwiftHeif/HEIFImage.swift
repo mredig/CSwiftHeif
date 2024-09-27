@@ -94,12 +94,14 @@ public class HEIFImage {
 		try HEIFChroma(heif_image_get_chroma_format(imagePointer))
 	}
 
+	#if !canImport(FoundationNetworking)
 	public func getPixelAspectRatio() throws(HEIFError) -> (h: UInt32, v: UInt32) {
 		var h: UInt32 = 0
 		var v: UInt32 = 0
 		try heif_image_get_pixel_aspect_ratio(imagePointer, &h, &v)
 		return (h, v)
 	}
+	#endif
 
 	public func getMetadata() throws(HEIFError) -> [HEIFMetadata] {
 		let metadataCount = heif_image_handle_get_number_of_metadata_blocks(handle, nil)

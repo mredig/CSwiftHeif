@@ -1,6 +1,4 @@
-module Clibheif [system] {
-	header "/opt/homebrew/opt/libheif/include/libheif/heif.h"
-//	header "/opt/homebrew/opt/libheif/include/libheif/heif_cxx.h"
+module Clibheif {
+	umbrella header "swift_heif.h"
 	link "heif"
-	export *
 }
