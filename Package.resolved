@@ -1,0 +1,24 @@
+{
+  "originHash" : "cbd1b92932488d012e3603bd3c338c27c932dd6e7c6f300f85b57552210e78dd",
+  "pins" : [
+    {
+      "identity" : "swiftgd",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/mredig/swiftgd.git",
+      "state" : {
+        "branch" : "contrib",
+        "revision" : "4bc6dcac7d3162cd8d5dd66d6f1cfbb455857d4f"
+      }
+    },
+    {
+      "identity" : "swiftpizzasnips",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/mredig/SwiftPizzaSnips.git",
+      "state" : {
+        "revision" : "d7b033afb6d00856a03b1261279cc5e88cf00050",
+        "version" : "0.4.19"
+      }
+    }
+  ],
+  "version" : 3
+}

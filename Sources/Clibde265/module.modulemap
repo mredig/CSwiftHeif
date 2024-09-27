@@ -1,0 +1,5 @@
+module Clibde265 [system] {
+	header "/opt/homebrew/opt/libde265/include/libde265/de265.h"
+	link "de265"
+	export *
+}
