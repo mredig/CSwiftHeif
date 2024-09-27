@@ -2,6 +2,7 @@ import Testing
 import CSwiftHeif
 import Foundation
 import SwiftPizzaSnips
+import ResourceVendor
 
 @Test func testHeif() async throws {
 	// Write your test here and use APIs like `#expect(...)` to check expected conditions.
@@ -12,7 +13,7 @@ import SwiftPizzaSnips
 	]
 
 	for imageName in images {
-		let resource = try Bundle.module.url(forResource: imageName, withExtension: "HEIC").unwrap()
+		let resource = try Bundle.resourceVendor.url(forResource: imageName, withExtension: "HEIC").unwrap()
 
 		let file = try HEIFFile(file: resource)
 		try test(heif: file)

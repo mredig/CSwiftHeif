@@ -51,10 +51,12 @@ let package = Package(
 			dependencies: [
 				"CSwiftHeif",
 				"SwiftPizzaSnips",
-			],
+				"ResourceVendor",
+			]),
+		.target(
+			name: "ResourceVendor",
 			resources: [
 				.process("Resources")
-			]
-		),
-    ]
+			]),
+	]
 )
