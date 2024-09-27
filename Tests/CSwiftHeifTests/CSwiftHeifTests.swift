@@ -16,11 +16,11 @@ import ResourceVendor
 		let resource = try Bundle.resourceVendor.url(forResource: imageName, withExtension: "HEIC").unwrap()
 
 		let file = try HEIFFile(file: resource)
-		try test(heif: file)
+		try await test(heif: file)
 	}
 }
 
-private func test(heif file: HEIFFile) throws {
+private func test(heif file: HEIFFile) async throws {
 	print(file)
 	print(file.topImageCount)
 	print(file.topLevelImageIDs)
@@ -38,7 +38,7 @@ private func test(heif file: HEIFFile) throws {
 //	try print(image.getChannels())
 //	try print(image.getBitsPerPixel())
 
-	let jpgData = try image.jpegData()
+	let jpgData = try await image.jpegData()
 
 	try jpgData
 		.write(to: URL(filePath: "/Users/mredig/Swap/\(String.randomLoremIpsum(wordCount: 2)).jpg"))

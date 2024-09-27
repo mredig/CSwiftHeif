@@ -1,7 +1,7 @@
 import Foundation
 @preconcurrency import Clibheif
 
-public enum HEIFChannel: UInt32, CaseIterable {
+public enum HEIFChannel: UInt32, CaseIterable, Sendable {
 	case Y = 0
 	case Cb = 1
 	case Cr = 2

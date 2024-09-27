@@ -1,7 +1,7 @@
 import Clibheif
 import Foundation
 import SwiftPizzaSnips
-import SwiftGD
+@preconcurrency import SwiftGD
 import gd
 
 public class HEIFImage {
@@ -171,7 +171,7 @@ public class HEIFImage {
 		}
 	}
 
-	public struct Plane {
+	public struct Plane: Sendable {
 		public let data: Data
 		public let rowStride: Int
 		public let channel: HEIFChannel
@@ -203,8 +203,6 @@ public class HEIFImage {
 		let greenChannel = try getPlane(.g, copyData: false)
 		let blueChannel = try getPlane(.b, copyData: false)
 
-		let bpp = try getBitsPerPixel()
-
 		let redOffset = point.y * redChannel.rowStride + point.x
 		let greenOffset = point.y * greenChannel.rowStride + point.x
 		let blueOffset = point.y * blueChannel.rowStride + point.x
@@ -216,40 +214,68 @@ public class HEIFImage {
 		return Color(red: redV, green: greenV, blue: blueV, alpha: 1)
 	}
 
-	public func jpegData() throws -> Data {
+	private final class SendablePointer<Foo>: @unchecked Sendable {
+		let pointer: UnsafeMutablePointer<Foo>
+
+		init(pointer: UnsafeMutablePointer<Foo>) {
+			self.pointer = pointer
+		}
+	}
+
+	public func jpegData() async throws -> Data {
 		let imagePointer = try getImagePointer(colorspace: .RGB, chroma: .interleaved24Bit)
 		defer { heif_image_release(imagePointer) }
 
 		let plane = try _getPlane(.interleaved, copyData: true, imagePointer: imagePointer)
 
 		guard
-			let newGDImage = gdImageCreateTrueColor(Int32(width), Int32(height))
+			let newGDImage: UnsafeMutablePointer<gdImageStruct> = gdImageCreateTrueColor(Int32(width), Int32(height))
 		else { throw SimpleError(message: "Failed to create gd image") }
+		let imageWrapper = SendablePointer(pointer: newGDImage)
 
-		for y in 0..<height {
-			for x in 0..<width {
-				let offset = y * plane.rowStride + (x * 3)
-				let r = plane.data[offset]
-				let g = plane.data[offset + 1]
-				let b = plane.data[offset + 2]
+		await withTaskGroup(of: Void.self) { [width] group in
 
-				let newValue = gdTrueColorAlpha(r, g: g, b: b, a: UInt8(gdAlphaMax))
-
-				newGDImage
-					.pointee
-					.tpixels
-					.advanced(by: y)
-					.pointee?
-					.advanced(by: x)
-					.pointee = newValue
+			let strideAmount = 100
+			for yStride in stride(from: 0, through: height, by: strideAmount) {
+				let yRange = yStride..<(min(yStride + strideAmount, height))
+				group.addTask { [imageWrapper] in
+					for y in yRange {
+						for x in 0..<width {
+							Self.copy(point: Point(x: x, y: y), from: plane, to: imageWrapper)
+						}
+					}
+				}
 			}
+
+			await group.waitForAll()
 		}
 
 		let image = Image(newGDImage)
 		return try image.export(as: .jpg(quality: 90))
 	}
 
-	private func gdTrueColorAlpha(_ r: UInt8, g: UInt8, b: UInt8, a: UInt8) -> Int32 {
+	nonisolated
+	private static func copy(point: Point, from plane: Plane, to gdImage: SendablePointer<gdImage>) {
+		let (x, y) = (point.x, point.y)
+		let offset = y * plane.rowStride + (x * 3)
+		let r = plane.data[offset]
+		let g = plane.data[offset + 1]
+		let b = plane.data[offset + 2]
+
+		let newValue = gdTrueColorAlpha(r, g: g, b: b, a: UInt8(gdAlphaMax))
+
+		gdImage
+			.pointer
+			.pointee
+			.tpixels
+			.advanced(by: y)
+			.pointee?
+			.advanced(by: x)
+			.pointee = newValue
+	}
+
+	nonisolated
+	private static func gdTrueColorAlpha(_ r: UInt8, g: UInt8, b: UInt8, a: UInt8) -> Int32 {
 		let a = UInt32(a) << 24
 		let r = UInt32(r) << 16
 		let g = UInt32(g) << 8

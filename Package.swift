@@ -53,6 +53,12 @@ let package = Package(
 				"SwiftPizzaSnips",
 				"ResourceVendor",
 			]),
+		.executableTarget(
+			name: "PerformanceTester",
+			dependencies: [
+				"CSwiftHeif",
+				"ResourceVendor",
+			]),
 		.target(
 			name: "ResourceVendor",
 			resources: [
