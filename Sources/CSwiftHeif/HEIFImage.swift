@@ -1,8 +1,7 @@
 import Clibheif
 import Foundation
 import SwiftPizzaSnips
-@preconcurrency import SwiftGD
-import gd
+import TinySwiftJPEG
 
 public class HEIFImage {
 	var parent: HEIFFile
@@ -198,22 +197,6 @@ public class HEIFImage {
 		return Plane(data: data, rowStride: Int(stride), channel: channel)
 	}
 
-	public func getPixel(at point: Point) throws(HEIFError) -> Color {
-		let redChannel = try getPlane(.r, copyData: false)
-		let greenChannel = try getPlane(.g, copyData: false)
-		let blueChannel = try getPlane(.b, copyData: false)
-
-		let redOffset = point.y * redChannel.rowStride + point.x
-		let greenOffset = point.y * greenChannel.rowStride + point.x
-		let blueOffset = point.y * blueChannel.rowStride + point.x
-
-		let redV = Double(redChannel.data[redOffset]) / 255.0
-		let greenV = Double(greenChannel.data[greenOffset]) / 255.0
-		let blueV = Double(blueChannel.data[blueOffset]) / 255.0
-
-		return Color(red: redV, green: greenV, blue: blueV, alpha: 1)
-	}
-
 	private final class SendablePointer<Foo>: @unchecked Sendable {
 		let pointer: UnsafeMutablePointer<Foo>
 
@@ -228,50 +211,13 @@ public class HEIFImage {
 
 		let plane = try _getPlane(.interleaved, copyData: true, imagePointer: imagePointer)
 
-		guard
-			let newGDImage: UnsafeMutablePointer<gdImageStruct> = gdImageCreateTrueColor(Int32(width), Int32(height))
-		else { throw SimpleError(message: "Failed to create gd image") }
-		let imageWrapper = SendablePointer(pointer: newGDImage)
-
-		await withTaskGroup(of: Void.self) { [width] group in
-
-			let strideAmount = 100
-			for yStride in stride(from: 0, through: height, by: strideAmount) {
-				let yRange = yStride..<(min(yStride + strideAmount, height))
-				group.addTask { [imageWrapper] in
-					for y in yRange {
-						for x in 0..<width {
-							Self.copy(point: Point(x: x, y: y), from: plane, to: imageWrapper)
-						}
-					}
-				}
-			}
-
-			await group.waitForAll()
-		}
-
-		let image = Image(newGDImage)
-		return try image.export(as: .jpg(quality: 90))
-	}
-
-	nonisolated
-	private static func copy(point: Point, from plane: Plane, to gdImage: SendablePointer<gdImage>) {
-		let (x, y) = (point.x, point.y)
-		let offset = y * plane.rowStride + (x * 3)
-		let r = plane.data[offset]
-		let g = plane.data[offset + 1]
-		let b = plane.data[offset + 2]
-
-		let newValue = gdTrueColorAlpha(r, g: g, b: b, a: UInt8(gdAlphaMax))
-
-		gdImage
-			.pointer
-			.pointee
-			.tpixels
-			.advanced(by: y)
-			.pointee?
-			.advanced(by: x)
-			.pointee = newValue
+		return try TinySwiftJPEG.encodeJPEG(
+			from: plane.data,
+			rowStride: plane.rowStride,
+			width: width,
+			height: height,
+			channels: .rgb,
+			quality: .good)
 	}
 
 	nonisolated

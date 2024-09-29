@@ -9,21 +9,16 @@ let package = Package(
 		.macOS(.v13),
 	],
     products: [
-        // Products define the executables and libraries a package produces, making them visible to other packages.
         .library(
             name: "CSwiftHeif",
             targets: ["CSwiftHeif"]),
     ],
 	dependencies: [
 		.package(url: "https://github.com/mredig/SwiftPizzaSnips.git", .upToNextMinor(from: "0.4.0")),
-//		.package(url: "https://github.com/twostraws/swiftgd.git", from: "2.5.0"),
-		.package(url: "https://github.com/mredig/swiftgd.git", branch: "contrib"),
+		.package(url: "https://github.com/mredig/TinySwiftJPEG.git", .upToNextMajor(from: "0.1.1")),
 
 	],
     targets: [
-        // Targets are the basic building blocks of a package, defining a module or a test suite.
-        // Targets can depend on other targets in this package and products from dependencies.
-
 		.systemLibrary(
 			name: "Clibheif",
 			pkgConfig: "libheif",
@@ -44,7 +39,7 @@ let package = Package(
 				"Clibheif",
 				"Clibde265",
 				"SwiftPizzaSnips",
-				.product(name: "SwiftGD", package: "swiftgd"),
+				"TinySwiftJPEG"
 			]),
 		.testTarget(
 			name: "CSwiftHeifTests",

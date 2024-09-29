@@ -6,16 +6,13 @@ import ResourceVendor
 
 @Test func testHeif() async throws {
 	// Write your test here and use APIs like `#expect(...)` to check expected conditions.
+	let images = Bundle
+		.resourceVendor
+		.urls(forResourcesWithExtension: "HEIC", subdirectory: nil)?
+		.sorted(by: { $0.lastPathComponent < $1.lastPathComponent }) ?? []
 
-	let images = [
-		"IMG_4812",
-		"IMG_3456",
-	]
-
-	for imageName in images {
-		let resource = try Bundle.resourceVendor.url(forResource: imageName, withExtension: "HEIC").unwrap()
-
-		let file = try HEIFFile(file: resource)
+	for imageURL in images {
+		let file = try HEIFFile(file: imageURL)
 		try await test(heif: file)
 	}
 }

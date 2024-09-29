@@ -1,15 +1,6 @@
 {
-  "originHash" : "cbd1b92932488d012e3603bd3c338c27c932dd6e7c6f300f85b57552210e78dd",
+  "originHash" : "510196dce115967d77af442fedd61f6516eee185f7b1d7387abc032ae384f828",
   "pins" : [
-    {
-      "identity" : "swiftgd",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/mredig/swiftgd.git",
-      "state" : {
-        "branch" : "contrib",
-        "revision" : "94edc6c3382398075c763ed26093c73df54a029c"
-      }
-    },
     {
       "identity" : "swiftpizzasnips",
       "kind" : "remoteSourceControl",
@@ -17,6 +8,15 @@
       "state" : {
         "revision" : "d7b033afb6d00856a03b1261279cc5e88cf00050",
         "version" : "0.4.19"
+      }
+    },
+    {
+      "identity" : "tinyswiftjpeg",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/mredig/TinySwiftJPEG.git",
+      "state" : {
+        "revision" : "280c44d5a6929cdda1c25c5750ac40d945cdfde3",
+        "version" : "0.1.1"
       }
     }
   ],
